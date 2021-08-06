@@ -1,9 +1,6 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-
 import numpy as np
 import matplotlib.pyplot as plt
-import nengo
+from os import mkdir
 
 # Refer to parameters.txt for documentation
 dt = 0.001
@@ -28,11 +25,18 @@ class Alpha(object):
             self.bias.append(1 + biasd * y)
 
     def plot(self):
+        try:
+            mkdir("./out")
+        except FileExistsError:
+            pass
+
+        out = f"./out/{self.__class__.__name__}"
         plt.plot(self.x, self.y)
 
         plt.xlabel("Norepinephrine concentration (nM)")
         plt.ylabel("Activity (%)")
-        plt.title("Norepinepherine Concentration vs Neuron Activity in " + self.pretty)
+        plt.title("Norepinepherine Concentration vs Neuron Activity in " +
+            self.pretty)
 
         plt.vlines(self.ki, 0, 1, linestyles="dashed")
         plt.text(1.1 * self.ki, 0.1, "Affinity")
@@ -45,8 +49,7 @@ class Alpha(object):
         gc.set_yticklabels(['{:.0f}%'.format(x * 100) for x in gc.get_yticks()])
 
         plt.draw()
-        plt.savefig(self.__class__.__name__ + "-norep-activity.png", dpi=1000)
-        plt.show()
+        plt.savefig(f"{out}-norep-activity.png", dpi=1000)
         
         #######################################################################
         
@@ -54,11 +57,10 @@ class Alpha(object):
         
         plt.xlabel("Norepinephrine concentration (nM)")
         plt.ylabel("Gain")
-        plt.title("Concentration vs Gain in " + self.pretty)
-        
+        plt.title(f"Concentration vs Gain in {self.pretty}")
+
         plt.draw()
-        plt.savefig(self.__class__.__name__ + "-concentration-gain.png", dpi=1000)
-        plt.show()
+        plt.savefig(f"{out}-concentration-gain.png", dpi=1000)
         
         #######################################################################
         
@@ -69,14 +71,13 @@ class Alpha(object):
         plt.title("Concentration vs Bias in " + self.pretty)
         
         plt.draw()
-        plt.savefig(self.__class__.__name__ + "-concentration-bias.png", dpi=1000)
-        plt.show()
+        plt.savefig(f"{out}-concentration-bias.png", dpi=1000)
 
 class Alpha1(Alpha):
     def __init__(self):
         self.ki = 330
         self.offset = 5.895
-        self.pretty = u"α1 Receptor"
+        self.pretty = "α1 Receptor"
         self.gaind = 0.1
         self.biasd = 0.1
         super().__init__()
@@ -88,7 +89,7 @@ class Alpha2(Alpha):
     def __init__(self):
         self.ki = 56
         self.offset = 1
-        self.pretty = u"α2 Receptor"
+        self.pretty = "α2 Receptor"
         self.gaind = -0.04
         self.biasd = -0.02
         super().__init__()
