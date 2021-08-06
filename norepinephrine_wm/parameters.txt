@@ -1,0 +1,32 @@
+{
+'seed':3, #for the simulator build process
+'n_trials':3,
+'n_processes':9,
+'dt':0.001, #timestep
+'dt_sample':0.01, #timestep for data recording through probes
+'t_cue':1.0, #duration of cue presentation
+'t_delay':8.0, #duration of delay period between cue and decision
+'misperceive':0.1, #chance of failing to perceive the cue, causing no info to go into WM
+
+'neurons_inputs':100, #neurons for the inputs ensemble
+'neurons_wm':1000, #neurons for workimg memory ensemble
+'neurons_decide':100, #neurons for decision or basal ganglia
+'time_scale':0.4, #how fast does the 'time' dimension accumulate in WM neurons
+'cue_scale':1.0, #how strong is the cueulus from the visual system
+'tau':0.01, #synaptic time constant between ensembles
+'tau_wm':0.1, #synapse on recurrent connection in wm
+'noise_wm':0.005, #std of full-spectrum white noise inject into wm.neurons
+'noise_decision':0.3, #std of added gaussian noise in the default decision procedure; 
+
+'decision_type':'default', #decision procedure: 'default', 'basal_ganglia'
+'drug_type':'biophysical', #drug simulation: 'neural','functional','biophysical'				
+'drugs':['control','PHE','GFC'], #names of the of drugs to simulate, see dicts below
+'drug_effect_neural':{'control':0.0,'PHE':-0.2,'GFC':0.5}, #mean of cue onto wm.neurons
+'drug_effect_biophysical':{'control':[1.0,1,0],'PHE':[0.99,1.02],'GFC':[1.05,0.95]}, #k_gain, k_bias
+'drug_effect_functional':{'control':1.0,'PHE':0.985,'GFC':1.03}, #k_multiply
+
+'enc_min_cutoff':0.3, #minimum cutoff for "weak" encoders in preferred directions
+'enc_max_cutoff':0.6, #maximum cutoff for "weak" encoders in preferred directions
+'sigma_smoothing':0.005, #gaussian smoothing applied to spike data to calculate firing rate
+'frac':0.01, #fraction of neurons in WM to add to firing rate dataframe and plot
+}

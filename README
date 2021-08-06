@@ -1,0 +1,12 @@
+Modeling the Effects of Norepinephrine Concentration on Working Memory in the
+Prefrontal Cortex with a1 and a2 Receptors.
+
+Python model doing the above. Part of Boston University RISE 2021.
+
+Julia Tomaszewska, Armaan Bhojwani, Thalia Inui, Nitsueh Kebere, Dr.
+Marianne Bezaire.
+
+The work in this repository was in-part derived from "Effects of Guanfacine and
+Phenylephrine on a Spiking Neuron Model of Working Memory" by Peter Duggins,
+Terry Stewart, Xuan Choo, Chris Eliasmith.
+<https://github.com/psipeter/drugs_and_working_memory>
