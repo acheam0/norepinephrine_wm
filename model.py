@@ -1,28 +1,51 @@
-import numpy as np
-import matplotlib.pyplot as plt
 from os import mkdir
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
+import nengo
+import numpy as np
 
-# Refer to parameters.txt for documentation
-dt = 0.001
-t_cue = 1.0
-cue_scale = 1.0
-perceived = 0 # ???
-time_scale = 0.4
-steps = 100
+exec(open("conf.py").read())
+
+def wm_recurrent_function(x):
+	return x
+
+
+def inputs_function(x):
+	return x * tau_wm
+
+
+def noise_decision_function(t):
+	return np.random.normal(0.0, noise_decision)
+
+
+def noise_bias_function(t):
+	return np.random.normal(0.0, noise_wm)
+
+
+def time_function(t):
+    return time_scale if t > t_cue else 0
+
+
+def decision_function(x):
+    return 1.0 if x[0] + x[1] > 0.0 else -1.0
+
 
 class Alpha(object):
+    """
+    Base class for alpha receptors. Not to be used directly.
+    """
+
     def __init__(self):
         self.x = np.logspace(0, 3, steps)
         self.y = 1 / (1 + (999 * np.exp(-0.1233 * (self.x / self.offset))))
-        
+
         self.gain = []
         self.bias = []
-        
-    def calcgb(self, gaind, biasd):
+
         for i in range(steps):
             y = self.y[i]
-            self.gain.append(1 + gaind * y)
-            self.bias.append(1 + biasd * y)
+            self.gain.append(1 + self.gaind * y)
+            self.bias.append(1 + self.biasd * y)
 
     def plot(self):
         try:
@@ -36,7 +59,7 @@ class Alpha(object):
         plt.xlabel("Norepinephrine concentration (nM)")
         plt.ylabel("Activity (%)")
         plt.title("Norepinepherine Concentration vs Neuron Activity in " +
-            self.pretty)
+                  self.pretty)
 
         plt.vlines(self.ki, 0, 1, linestyles="dashed")
         plt.text(1.1 * self.ki, 0.1, "Affinity")
@@ -45,35 +68,79 @@ class Alpha(object):
         plt.text(1, 0.51, "50%")
 
         plt.xscale("log")
-        gc = plt.gca()
-        gc.set_yticklabels(['{:.0f}%'.format(x * 100) for x in gc.get_yticks()])
+        plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter())
 
         plt.draw()
         plt.savefig(f"{out}-norep-activity.png", dpi=1000)
-        
+
         #######################################################################
-        
+
         plt.plot(self.x, self.gain)
-        
+
         plt.xlabel("Norepinephrine concentration (nM)")
         plt.ylabel("Gain")
         plt.title(f"Concentration vs Gain in {self.pretty}")
 
         plt.draw()
         plt.savefig(f"{out}-concentration-gain.png", dpi=1000)
-        
+
         #######################################################################
-        
+
         plt.plot(self.x, self.bias)
-        
+
         plt.xlabel("Norepinephrine concentration (nM)")
         plt.ylabel("Bias")
         plt.title("Concentration vs Bias in " + self.pretty)
-        
+
         plt.draw()
         plt.savefig(f"{out}-concentration-bias.png", dpi=1000)
 
+    def simulate(self):
+            with nengo.Network() as net:
+                # Nodes
+                time_node = nengo.Node(output=time_function)
+                noise_wm_node = nengo.Node(output=noise_bias_function)
+                noise_decision_node = nengo.Node(
+                    output=noise_decision_function)
+
+                # Ensembles
+                wm = nengo.Ensemble(neurons_wm, 2)
+                decision = nengo.Ensemble(neurons_decide, 2)
+                inputs = nengo.Ensemble(neurons_inputs, 2)
+                output = nengo.Ensemble(neurons_decide, 1)
+
+                # Connections
+                nengo.Connection(time_node, inputs[1], synapse=None)
+                nengo.Connection(inputs, wm, synapse=tau_wm,
+                                 function=inputs_function)
+                wm_recurrent = nengo.Connection(wm, wm, synapse=tau_wm,
+                                                function=wm_recurrent_function)
+                nengo.Connection(noise_wm_node, wm.neurons, synapse=tau_wm,
+                                 transform=np.ones((neurons_wm, 1)) * tau_wm)
+                wm_to_decision = nengo.Connection(
+                    wm[0], decision[0], synapse=tau)
+                nengo.Connection(noise_decision_node,
+                                 decision[1], synapse=None)
+                nengo.Connection(decision, output, function=decision_function)
+
+                # Probes
+                #probes_wm = nengo.Probe(
+                #    wm[0], synapse=0.01, sample_every=dt_sample)
+                #probes_spikes = nengo.Probe(wm.neurons, 'spikes',
+                #                            sample_every=dt_sample)
+                #probe_output = nengo.Probe(output, synapse=None,
+                #                           same_every=dt_sample)
+
+                # Run simulation
+                with nengo.Simulator(net, dt=dt) as sim:
+                    sim.run(t_cue + t_delay)
+
+
 class Alpha1(Alpha):
+    """
+    Subclass of Alpha representing an alpha1 receptor.
+    """
+
     def __init__(self):
         self.ki = 330
         self.offset = 5.895
@@ -81,11 +148,13 @@ class Alpha1(Alpha):
         self.gaind = 0.1
         self.biasd = 0.1
         super().__init__()
-        
-    def calcgb(self):
-        super().calcgb(self.gaind, self.biasd)
+
 
 class Alpha2(Alpha):
+    """
+    Subclass of Alpha representing an alpha2 receptor.
+    """
+
     def __init__(self):
         self.ki = 56
         self.offset = 1
@@ -93,20 +162,18 @@ class Alpha2(Alpha):
         self.gaind = -0.04
         self.biasd = -0.02
         super().__init__()
-        
-    def calcgb(self):
-        super().calcgb(self.gaind, self.biasd)
+
 
 def main():
-    plt.style.use("ggplot")
-    
-    a1 = Alpha1()
-    a1.calcgb()
-    a1.plot()
+    plt.style.use("ggplot")  # Nice looking and familiar style
 
-    a2 = Alpha2()
-    a2.calcgb()
-    a2.plot()
+    a1 = Alpha1()
+    # a1.plot()
+    a1.simulate()
+
+    #a2 = Alpha2()
+    # a2.plot()
+
 
 if __name__ == "__main__":
     main()
