@@ -1,5 +1,3 @@
-*.png
-*.pkl
 *.pyc
-params.json
 out/
+venv
