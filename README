@@ -28,7 +28,7 @@ Modify conf.py as needed:
 
 	vi conf.py
 
-Run simulation (use the -h flag to see more options):
+Run simulation:
 
 	python3 model.py
 
