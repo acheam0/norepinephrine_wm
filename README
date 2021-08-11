@@ -8,8 +8,7 @@ Marianne Bezaire.
 
 The work in this repository was in-part derived from "Effects of Guanfacine and
 Phenylephrine on a Spiking Neuron Model of Working Memory" by Peter Duggins,
-Terry Stewart, Xuan Choo, Chris Eliasmith. Some of those original files are
-preserved in old/.
+Terry Stewart, Xuan Choo, Chris Eliasmith.
 <https://github.com/psipeter/drugs_and_working_memory>
 
 Usage
@@ -32,4 +31,7 @@ Run simulation:
 
 	python3 model.py
 
-Results are stored in ./out/.
+An overall progress bar is shown during the simulation, and more detailed
+results are stored in a log file. Logs and charts are stored in ./out/. The
+simulation will be skipped if a file named simulation.pkl is present. It will be
+loaded and used instead of the simulation being run.
